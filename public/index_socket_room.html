@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>jQuery AJAX client</title>
+</head>
+<body>
+	<div>
+		<input type="text" placeholder="Your name" id="nameInput">
+		<input type="button" value="OK" id="nameButton">
+	</div>	
+	<div>
+		<input type="text" placeholder="Your name" id="nameRoom">
+		<input type="button" value="OK" id="roomButton">
+	</div>
+	<ul id="messages"></ul>
+	<div>
+		<textarea id="text" cols="30" rows="10"></textarea>
+		<input type="button" value="Send" id="textSubmit">
+	</div>
+</body>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
+<script type="text/javascript">
+	(function() {
+		var nameButton = $('#nameButton'),
+			nameInput = $('#nameInput'),
+			nameRoom = $('#nameRoom'),
+			roomButton = $('#roomButton'),
+			messages = $('#messages'),
+			text = $('#text'),
+			textSubmit = $('#textSubmit');
+
+		var userName = 'User1';
+		var room = 'Common';
+		var socket = io.connect();
+
+		nameButton.onclick = function() {
+			userName = nameInput.value || 'User1';
+		};
+
+		roomButton.click(function() {
+			socket.emit('join room', nameRoom.val());
+		});
+
+		textSubmit.click(function() {
+			var data = {
+				name: userName,
+				text: text.val()
+			};
+
+			text.val('');
+			socket.emit('room message', data);
+		});
+
+		socket.on('room history', function(msg) {
+			for(var i in msg) {
+				if(msg.hasOwnProperty(i)) {
+					messages.append($('<li>').text(msg[i].name + ': ' + msg[i].text));				
+				}
+			}
+		});
+
+		socket.on('room message', function(msg) {
+			messages.append($('<li>').text(msg.name + ': ' + msg.text));
+		});
+
+	})();
+</script>
+</html>

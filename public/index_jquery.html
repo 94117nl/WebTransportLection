@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>jQuery AJAX client</title>
+</head>
+<body>
+	<div>
+		<input type="text" placeholder="Your name" id="nameInput">
+		<input type="button" value="OK" id="nameButton">
+	</div>
+	<ul id="messages"></ul>
+	<div>
+		<textarea id="text" cols="30" rows="10"></textarea>
+		<input type="button" value="Send" id="textSubmit">
+	</div>
+</body>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript">
+	(function() {
+		var nameButton = $('#nameButton'),
+			nameInput = $('#nameInput'),
+			messages = $('#messages'),
+			text = $('#text'),
+			textSubmit = $('#textSubmit');
+
+		var userName = 'User1';
+		nameButton.onclick = function() {
+			userName = nameInput.value || 'User1';
+		};
+
+		textSubmit.click(function() {
+			var data = {
+				name: userName,
+				text: text.val()
+			};
+
+			text.val('');
+			$.post('/messages', data);
+		});
+
+		var getData = function() {
+			messages.html('');
+			$.getJSON('/messages', function(msg) {
+				for(var i in msg) {
+					if(msg.hasOwnProperty(i)) {
+						messages.append($('<li>').text(msg[i].name + ': ' + msg[i].text));				
+					}
+				}
+			});
+		};
+
+		getData();
+
+		setInterval(function() {
+			getData();
+		}, 1000);
+
+	})();
+</script>
+</html>
